@@ -1,0 +1,38 @@
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\MainWindow.baml
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\MainWindow.g.cs
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface_MarkupCompile.cache
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.g.resources
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.AssemblyInfoInputs.cache
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.AssemblyInfo.cs
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.csproj.CoreCompileInputs.cache
+C:\Users\GREENCOM\source\repos\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.exe
+C:\Users\GREENCOM\source\repos\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.deps.json
+C:\Users\GREENCOM\source\repos\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.runtimeconfig.json
+C:\Users\GREENCOM\source\repos\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.pdb
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\refint\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.pdb
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.genruntimeconfig.cache
+C:\Users\GREENCOM\source\repos\SimulationInterface\obj\Debug\net10.0-windows\ref\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.exe
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.deps.json
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.runtimeconfig.json
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\bin\Debug\net10.0-windows\SimulationInterface.pdb
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\MainWindow.baml
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\MainWindow.g.cs
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface_MarkupCompile.cache
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.g.resources
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.AssemblyInfoInputs.cache
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.AssemblyInfo.cs
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.csproj.CoreCompileInputs.cache
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\refint\SimulationInterface.dll
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.pdb
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\SimulationInterface.genruntimeconfig.cache
+C:\Users\GREENCOM\source\repos\Assignment 4\SimulationInterface\obj\Debug\net10.0-windows\ref\SimulationInterface.dll

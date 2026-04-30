@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "SimulationInterface.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\dat154-Assignment-4\\Assignment 4.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

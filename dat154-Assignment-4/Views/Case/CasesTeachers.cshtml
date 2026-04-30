@@ -1,0 +1,28 @@
+﻿@model List<Assignment_4.Models.Patient>
+
+<h1>All Cases</h1>
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Sex</th>
+        <th>Active</th>
+        <th>Action</th>
+    </tr>
+    @foreach (var patient in Model)
+    {
+        <tr>
+            <td>@patient.Name</td>
+            <td>@patient.Age</td>
+            <td>@patient.Sex</td>
+            <td>@(patient.IsActive ? "Active" : "Inactive")</td>
+            <td>
+                <form method="post" asp-action="ToggleActive" asp-controller="Case">
+                    <input type="hidden" name="id" value="@patient.Id" />
+                    <button type="submit">@(patient.IsActive ? "Deactivate" : "Activate")</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

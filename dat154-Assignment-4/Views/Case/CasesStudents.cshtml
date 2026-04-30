@@ -1,0 +1,19 @@
+﻿@model Assignment_4.Models.Patient
+
+<h1>Your Assigned Case</h1>
+
+@if (Model == null)
+{
+    <p>No case has been assigned to you yet.</p>
+}
+else
+{
+    <p>Name: @Model.Name</p>
+    <p>Age: @Model.Age</p>
+    <p>Sex: @Model.Sex</p>
+    <p>Blood Pressure: @Model.SystolicBP / @Model.DiastolicBP</p>
+    <p>Heart Rate: @Model.HeartRate</p>
+    <p>Respiratory Rate: @Model.RespiratoryRate</p>
+    <p>Oxygen Saturation: @Model.OxygenSaturation</p>
+    <p>Temperature: @Model.Temperature</p>
+}

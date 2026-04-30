@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Assignment 4.csproj" />
+  <Project Path="..\SimulationInterface\SimulationInterface.csproj" />
+</Solution>
