@@ -31,7 +31,6 @@ namespace Assignment_4.Data
 
             foreach (var account in accounts)
             {
-                // Only create Identity user if not already in AspNetUsers
                 if (await userManager.FindByEmailAsync(account.Email) == null)
                 {
                     var identityUser = new IdentityUser
@@ -41,11 +40,9 @@ namespace Assignment_4.Data
                         EmailConfirmed = true
                     };
 
-                    // CreateAsync hashes the password and inserts into AspNetUsers
                     await userManager.CreateAsync(identityUser, account.Password);
                 }
 
-                // Only create CustomUser if not already there
                 if (!db.CustomUsers.Any(u => u.Email == account.Email))
                 {
                     db.CustomUsers.Add(new CustomUser
@@ -118,7 +115,6 @@ namespace Assignment_4.Data
             db.Patients.AddRange(patients);
             db.SaveChanges();
 
-            // Use the objects we already have — IDs are populated after SaveChanges
             var kariId = patients[0].Id;
             var larsId = patients[1].Id;
             var bjornId = patients[2].Id;

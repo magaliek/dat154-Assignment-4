@@ -39,6 +39,34 @@ public class SimulationSessionsController : ControllerBase
         return Ok(session.Id);
     }
 
+    [HttpGet("for-student/{studentCustomUserId:int}")]
+    public async Task<ActionResult<int>> GetSessionIdForStudent(int studentCustomUserId)
+    {
+        if (!await _db.CustomUsers.AsNoTracking().AnyAsync(u => u.Id == studentCustomUserId))
+            return NotFound("Unknown student id.");
+
+        var openId = await _db.SimulationSessions.AsNoTracking()
+            .Where(s => s.StudentCustomUserId == studentCustomUserId && s.EndedAt == null)
+            .OrderByDescending(s => s.StartedAt)
+            .Select(s => (int?)s.Id)
+            .FirstOrDefaultAsync();
+
+        if (openId.HasValue)
+            return Ok(openId.Value);
+
+        var latestId = await _db.SimulationSessions.AsNoTracking()
+            .Where(s => s.StudentCustomUserId == studentCustomUserId)
+            .OrderByDescending(s => s.StartedAt)
+            .Select(s => (int?)s.Id)
+            .FirstOrDefaultAsync();
+
+        if (latestId.HasValue)
+            return Ok(latestId.Value);
+
+        return NotFound(
+            "No simulation session for this student yet. The student must load a case in Task 2 first.");
+    }
+
     [HttpPost("{sessionId:int}/end")]
     public async Task<IActionResult> End(int sessionId)
     {

@@ -21,12 +21,12 @@
             </Grid.RowDefinitions>
 
             <HorizontalStackLayout Grid.Row="0" Spacing="10">
-                <Label Text="Session id" VerticalOptions="Center" TextColor="#333" />
-                <Entry x:Name="SessionIdEntry"
+                <Label Text="Student id" VerticalOptions="Center" TextColor="#333" />
+                <Entry x:Name="StudentIdEntry"
                        WidthRequest="100"
                        MinimumWidthRequest="80"
                        Keyboard="Numeric"
-                       Placeholder="e.g. 3"
+                       Placeholder="CustomUsers id"
                        PlaceholderColor="#888888"
                        BackgroundColor="White"
                        TextColor="#1a1a1a" />
@@ -35,7 +35,7 @@
 
             <Border Grid.Row="1" BackgroundColor="#1a1a2e" StrokeShape="RoundRectangle 5" Padding="12">
                 <HorizontalStackLayout Spacing="16">
-                    <Label x:Name="PatientNameLabel" Text="No session loaded"
+                    <Label x:Name="PatientNameLabel" Text="No case loaded"
                            TextColor="White" FontSize="18" FontAttributes="Bold" />
                     <Label x:Name="PatientInfoLabel" Text=""
                            TextColor="#cccccc" FontSize="14" VerticalOptions="Center" />
@@ -108,7 +108,7 @@
 
                     <VerticalStackLayout Grid.Row="2" Spacing="6">
                         <Label Text="Debrief" FontAttributes="Bold" FontSize="14" TextColor="#333" />
-                        <Label Text="Updates automatically while a session is open." FontSize="11" TextColor="#666" />
+                        <Label Text="Updates automatically after you load a student." FontSize="11" TextColor="#666" />
                         <Button Text="Export PDF" Clicked="OnExportPdfClicked" HorizontalOptions="Start" />
                         <Editor x:Name="DebriefEditor" IsReadOnly="True" HeightRequest="160" TextColor="#222"
                                 BackgroundColor="White" Placeholder="—" />

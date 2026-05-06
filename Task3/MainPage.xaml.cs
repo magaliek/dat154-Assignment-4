@@ -26,19 +26,20 @@ public partial class MainPage : ContentPage
     private readonly Dictionary<int, TeacherObservationDto> _observationById = new();
     private readonly HashSet<int> _knownActionIds = new();
     private int? _activeSessionId;
-    private int? _lastLoadedSessionId;
-    private DateTimeOffset? _actionWatermarkUtc;
+    private int? _loadedStudentCustomUserId;
     private IDispatcherTimer? _actionPollTimer;
     private bool _loadingSession;
+    private bool _pollInFlight;
     private CaseDto? _loadedCase;
 
     public MainPage()
     {
         InitializeComponent();
+        var baseUri = ApiBaseUrl.AsHttpClientBaseAddress();
         var h = new HttpClientHandler();
-        h.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-        // Matches Task1 launchSettings: http profile = :5049 only; https profile = :7101 + :5049. HTTP avoids TLS and works with the default "http" profile.
-        _http = new HttpClient(h) { BaseAddress = new Uri("http://localhost:5049") };
+        if (ApiBaseUrl.IsLocalhost(baseUri))
+            h.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+        _http = new HttpClient(h) { BaseAddress = baseUri };
         EventLogView.ItemsSource = _eventLines;
         AllergiesView.ItemsSource = _allergyLines;
         MedicationsView.ItemsSource = _medLines;
@@ -88,49 +89,43 @@ public partial class MainPage : ContentPage
         if (_loadingSession)
             return;
 
-        if (!int.TryParse(SessionIdEntry.Text?.Trim(), out var sid))
+        if (!int.TryParse(StudentIdEntry.Text?.Trim(), out var studentCustomUserId))
         {
-            await DisplayAlertAsync("", "Enter session id", "OK");
+            await DisplayAlertAsync("", "Enter the student id (same as in Task 2 — CustomUsers id).", "OK");
             return;
         }
-
-        if (_lastLoadedSessionId == sid && _activeSessionId == sid)
-            return;
 
         _loadingSession = true;
         try
         {
-            var resp = await _http.GetAsync($"api/sessions/{sid}/patient-summary");
-            if (!resp.IsSuccessStatusCode)
+            var resolveResp = await _http.GetAsync($"api/sessions/for-student/{studentCustomUserId}");
+            var resolveBody = await resolveResp.Content.ReadAsStringAsync();
+            if (!resolveResp.IsSuccessStatusCode)
+            {
+                await DisplayAlertAsync("", TryReadApiError(resolveBody) ?? "No simulation data for this student yet. They must load a case in Task 2 first.", "OK");
+                ClearSessionAndUi();
+                return;
+            }
+
+            int sessionId;
+            try
+            {
+                sessionId = JsonSerializer.Deserialize<int>(resolveBody, _json);
+            }
+            catch
+            {
+                await DisplayAlertAsync("", "Unexpected server response from the API.", "OK");
+                ClearSessionAndUi();
+                return;
+            }
+
+            _loadedStudentCustomUserId = studentCustomUserId;
+
+            if (!await LoadSessionForIdAsync(sessionId))
             {
                 await DisplayAlertAsync("", "Load failed", "OK");
                 ClearSessionAndUi();
-                _lastLoadedSessionId = null;
-                return;
             }
-
-            var dto = JsonSerializer.Deserialize<CaseDto>(await resp.Content.ReadAsStringAsync(), _json);
-            if (dto == null)
-            {
-                ClearSessionAndUi();
-                _lastLoadedSessionId = null;
-                return;
-            }
-
-            _activeSessionId = sid;
-            _lastLoadedSessionId = sid;
-            _loadedCase = dto;
-            _actionWatermarkUtc = null;
-            _knownActionIds.Clear();
-            _actionById.Clear();
-            _observationById.Clear();
-            _eventLines.Clear();
-
-            ApplyCase(dto);
-            await PollActionsAsync(sid, incremental: false);
-            await PollObservationsAsync(sid, incremental: false);
-            RebuildDebriefEditor();
-            StartActionPollTimer();
         }
         finally
         {
@@ -138,12 +133,62 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private string? TryReadApiError(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return null;
+        if (body[0] == '"')
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<string>(body, _json);
+            }
+            catch
+            {
+                return body;
+            }
+        }
+
+        return body;
+    }
+
+    private async Task<bool> LoadSessionForIdAsync(int sessionId)
+    {
+        var resp = await _http.GetAsync($"api/sessions/{sessionId}/patient-summary");
+        var json = await resp.Content.ReadAsStringAsync();
+        if (!resp.IsSuccessStatusCode)
+            return false;
+
+        var dto = JsonSerializer.Deserialize<CaseDto>(json, _json);
+        if (dto == null)
+            return false;
+
+        _activeSessionId = sessionId;
+        _loadedCase = dto;
+        _knownActionIds.Clear();
+        _actionById.Clear();
+        _observationById.Clear();
+        _eventLines.Clear();
+
+        await PollActionsAsync(sessionId, resetEventLog: true);
+        await PollObservationsAsync(sessionId, incremental: false);
+
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            ApplyCase(dto);
+            RebuildDebriefEditor();
+            StartActionPollTimer();
+        });
+
+        return true;
+    }
+
     private void ClearSessionAndUi()
     {
         StopActionPollTimer();
         _activeSessionId = null;
+        _loadedStudentCustomUserId = null;
         _loadedCase = null;
-        _actionWatermarkUtc = null;
         _knownActionIds.Clear();
         _actionById.Clear();
         _observationById.Clear();
@@ -154,7 +199,7 @@ public partial class MainPage : ContentPage
 
     private void ClearPatientUi()
     {
-        PatientNameLabel.Text = "No session loaded";
+        PatientNameLabel.Text = "No case loaded";
         PatientInfoLabel.Text = "";
         BpLabel.Text = "--/-- mmHg";
         HrLabel.Text = "-- bpm";
@@ -213,12 +258,35 @@ public partial class MainPage : ContentPage
 
     private async void OnPollTick(object? sender, EventArgs e)
     {
-        if (!_activeSessionId.HasValue)
+        if (!_activeSessionId.HasValue || _pollInFlight)
             return;
-        var sid = _activeSessionId.Value;
-        await PollActionsAsync(sid, incremental: true);
-        await PollObservationsAsync(sid, incremental: true);
-        MainThread.BeginInvokeOnMainThread(RebuildDebriefEditor);
+        _pollInFlight = true;
+        try
+        {
+            if (_loadedStudentCustomUserId.HasValue)
+            {
+                var resolveResp = await _http.GetAsync($"api/sessions/for-student/{_loadedStudentCustomUserId.Value}");
+                if (resolveResp.IsSuccessStatusCode)
+                {
+                    var resolveBody = await resolveResp.Content.ReadAsStringAsync();
+                    var latestSid = JsonSerializer.Deserialize<int>(resolveBody, _json);
+                    if (latestSid != _activeSessionId.Value)
+                    {
+                        await LoadSessionForIdAsync(latestSid);
+                        return;
+                    }
+                }
+            }
+
+            var sid = _activeSessionId.Value;
+            await PollActionsAsync(sid, resetEventLog: false);
+            await PollObservationsAsync(sid, incremental: true);
+            MainThread.BeginInvokeOnMainThread(RebuildDebriefEditor);
+        }
+        finally
+        {
+            _pollInFlight = false;
+        }
     }
 
     private static string FormatActionLine(SimulationActionDto a) =>
@@ -236,13 +304,14 @@ public partial class MainPage : ContentPage
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine($"Session id: {_activeSessionId.Value} · Patient id: {_loadedCase.Id} · {_loadedCase.Name}");
+        var stu = _loadedStudentCustomUserId?.ToString() ?? "?";
+        sb.AppendLine($"Student id: {stu} · {_loadedCase.Name}");
         sb.AppendLine();
 
         foreach (var a in _actionById.Values.OrderBy(x => x.OccurredAt).ThenBy(x => x.Id))
         {
             sb.AppendLine($"Student action · {FormatDebriefDateTime(a.OccurredAt)} · {a.Kind} {a.Drug} {a.DoseMg} {a.Route}");
-            foreach (var dev in a.Deviations.OrderBy(x => x.Id))
+            foreach (var dev in (a.Deviations ?? []).OrderBy(x => x.Id))
                 sb.AppendLine($"  {dev.RuleName}: {dev.Message}");
         }
 
@@ -255,22 +324,18 @@ public partial class MainPage : ContentPage
         DebriefEditor.Text = sb.ToString();
     }
 
-    private async Task PollActionsAsync(int sessionId, bool incremental)
+    private async Task PollActionsAsync(int sessionId, bool resetEventLog)
     {
         try
         {
-            var url = incremental && _actionWatermarkUtc.HasValue
-                ? $"api/sessions/{sessionId}/actions?since={Uri.EscapeDataString(_actionWatermarkUtc.Value.ToString("o", CultureInfo.InvariantCulture))}"
-                : $"api/sessions/{sessionId}/actions";
-
-            var resp = await _http.GetAsync(url);
+            var resp = await _http.GetAsync($"api/sessions/{sessionId}/actions");
             if (!resp.IsSuccessStatusCode)
                 return;
 
             var list = JsonSerializer.Deserialize<List<SimulationActionDto>>(await resp.Content.ReadAsStringAsync(), _json) ?? [];
             var ordered = list.OrderBy(x => x.OccurredAt).ThenBy(x => x.Id).ToList();
 
-            if (!incremental)
+            if (resetEventLog)
             {
                 _eventLines.Clear();
                 _knownActionIds.Clear();
@@ -290,14 +355,6 @@ public partial class MainPage : ContentPage
                     if (_knownActionIds.Add(a.Id))
                         _eventLines.Add(new LineItem { Text = FormatActionLine(a) });
                 }
-            }
-
-            if (ordered.Count > 0)
-            {
-                var batchMax = ordered.Max(x => x.OccurredAt);
-                _actionWatermarkUtc = _actionWatermarkUtc.HasValue
-                    ? (_actionWatermarkUtc.Value > batchMax ? _actionWatermarkUtc.Value : batchMax)
-                    : batchMax;
             }
         }
         catch
@@ -338,19 +395,20 @@ public partial class MainPage : ContentPage
             return;
         }
 
-        if (!int.TryParse(SessionIdEntry.Text?.Trim(), out var sid))
+        if (!_activeSessionId.HasValue || !_loadedStudentCustomUserId.HasValue)
         {
-            await DisplayAlertAsync("", "Enter session id", "OK");
+            await DisplayAlertAsync("", "Load a case first (enter student id).", "OK");
             return;
         }
 
         try
         {
+            var stu = _loadedStudentCustomUserId.Value;
             await using var ms = new MemoryStream();
-            DebriefPdfExporter.Write(ms, $"Debrief · session {sid}", text);
+            DebriefPdfExporter.Write(ms, $"Debrief · student {stu}", text);
             ms.Position = 0;
 
-            var result = await FileSaver.Default.SaveAsync($"debrief-session-{sid}.pdf", ms, CancellationToken.None);
+            var result = await FileSaver.Default.SaveAsync($"debrief-student-{stu}.pdf", ms, CancellationToken.None);
             if (result.IsSuccessful && !string.IsNullOrEmpty(result.FilePath))
                 await DisplayAlertAsync("", $"Saved to:\n{result.FilePath}", "OK");
             else if (result.IsCancelled)

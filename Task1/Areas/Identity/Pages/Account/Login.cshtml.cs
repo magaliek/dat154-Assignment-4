@@ -1,16 +1,13 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
@@ -34,7 +31,6 @@ namespace Assignment_4.Areas.Identity.Pages.Account
 
         [BindProperty]
         public InputModel Input { get; set; }
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
         public string ReturnUrl { get; set; }
 
         [TempData]
@@ -54,8 +50,21 @@ namespace Assignment_4.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                var email = User.Identity?.Name;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var u = _db.CustomUsers.FirstOrDefault(x => x.Email == email);
+                    if (u != null)
+                        return RedirectToCasesForRole(u.Role);
+                }
+
+                return RedirectToAction("TeacherCases", "Case");
+            }
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -63,14 +72,13 @@ namespace Assignment_4.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             ReturnUrl = returnUrl;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
@@ -80,9 +88,7 @@ namespace Assignment_4.Areas.Identity.Pages.Account
                     _logger.LogInformation("User logged in.");
                     var u = _db.CustomUsers.FirstOrDefault(user => user.Email == Input.Email);
                     if (u == null) return LocalRedirect(returnUrl);
-                    if (u.Role == "Teacher")
-                        return RedirectToAction("TeacherCases", "Case");
-                    return RedirectToAction("StudentCases", "Case");
+                    return RedirectToCasesForRole(u.Role);
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -101,6 +107,14 @@ namespace Assignment_4.Areas.Identity.Pages.Account
             }
 
             return Page();
+        }
+
+        /// <summary>Students see only their assigned case; teachers (and admin, etc.) see all cases.</summary>
+        private IActionResult RedirectToCasesForRole(string? role)
+        {
+            if (string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase))
+                return RedirectToAction("StudentCases", "Case");
+            return RedirectToAction("TeacherCases", "Case");
         }
     }
 }

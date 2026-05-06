@@ -15,8 +15,6 @@
             <TextBlock Text="Student ID:" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox x:Name="StudentIdBox" Width="100" Margin="0,0,10,0"/>
             <Button x:Name="LoadCaseButton" Content="Load Case" Click="LoadCaseButton_Click"/>
-            <TextBlock Text="Session id (Task3):" VerticalAlignment="Center" Margin="16,0,5,0"/>
-            <TextBlock x:Name="SessionIdText" VerticalAlignment="Center" FontWeight="Bold"/>
         </StackPanel>
 
         <!-- Row 1: Patient header -->

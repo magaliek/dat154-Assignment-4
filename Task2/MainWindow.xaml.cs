@@ -23,17 +23,16 @@ namespace Task2
                 return;
             }
 
-            var patient = await _apiService.GetCaseForStudent(studentId);
+            var (patient, loadError) = await _apiService.GetCaseForStudent(studentId);
 
             if (patient == null)
             {
-                MessageBox.Show("No active case found for this student.");
+                MessageBox.Show(loadError ?? "Could not load case for this student.");
                 return;
             }
 
             _currentPatient = patient;
             _sessionId = await _apiService.StartSessionAsync(patient.Id, studentId);
-            SessionIdText.Text = _sessionId?.ToString() ?? "";
             DisplayPatient(patient);
         }
 

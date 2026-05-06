@@ -1,19 +1,104 @@
-﻿@model Assignment_4.Models.Patient
-
-<h1>Your Assigned Case</h1>
-
-@if (Model == null)
-{
-    <p>No case has been assigned to you yet.</p>
+@model Assignment_4.Models.StudentCasePageViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Your case";
+    var inv = CultureInfo.InvariantCulture;
+    string F1(double? v) => v.HasValue ? v.Value.ToString("F1", inv) : "—";
 }
-else
-{
-    <p>Name: @Model.Name</p>
-    <p>Age: @Model.Age</p>
-    <p>Sex: @Model.Sex</p>
-    <p>Blood Pressure: @Model.SystolicBP / @Model.DiastolicBP</p>
-    <p>Heart Rate: @Model.HeartRate</p>
-    <p>Respiratory Rate: @Model.RespiratoryRate</p>
-    <p>Oxygen Saturation: @Model.OxygenSaturation</p>
-    <p>Temperature: @Model.Temperature</p>
-}
+
+<div class="cases-page-shell student-case-shell py-2">
+    <h1 class="mb-3">Your assigned case</h1>
+
+    @if (Model.Patient == null)
+    {
+        <p class="text-muted">No case has been assigned to you yet. Ask your teacher to assign a case and mark it <strong>active</strong>.</p>
+    }
+    else
+    {
+        var p = Model.Patient;
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-center fw-semibold">
+                @p.Name
+                @if (p.IsActive)
+                {
+                    <span class="badge bg-success ms-2">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary ms-2">Inactive</span>
+                }
+            </div>
+            <div class="card-body student-case-body">
+                <h6 class="text-muted text-uppercase small">Demographics &amp; vitals</h6>
+                <ul class="list-unstyled mb-3">
+                    <li><strong>Age:</strong> @p.Age</li>
+                    <li><strong>Sex:</strong> @p.Sex</li>
+                    <li><strong>Weight:</strong> @p.Weight</li>
+                    <li><strong>Blood pressure:</strong> @F1(p.SystolicBP) / @F1(p.DiastolicBP) mmHg</li>
+                    <li><strong>Heart rate:</strong> @F1(p.HeartRate) bpm</li>
+                    <li><strong>Respiratory rate:</strong> @F1(p.RespiratoryRate) /min</li>
+                    <li><strong>Oxygen saturation:</strong> @F1(p.OxygenSaturation) %</li>
+                    <li><strong>Temperature:</strong> @F1(p.Temperature) °C</li>
+                </ul>
+
+                @if (p.Diagnoses.Any())
+                {
+                    <h6 class="text-muted text-uppercase small">Diagnoses</h6>
+                    <ul class="mb-3">
+                        @foreach (var d in p.Diagnoses.OrderBy(x => x.Id))
+                        {
+                            <li>@d.Diagnosis1</li>
+                        }
+                    </ul>
+                }
+
+                @if (p.Goals.Any())
+                {
+                    <h6 class="text-muted text-uppercase small">Goals</h6>
+                    <ul class="mb-3">
+                        @foreach (var g in p.Goals.OrderBy(x => x.Id))
+                        {
+                            <li>@g.Goal1</li>
+                        }
+                    </ul>
+                }
+
+                @if (p.Medications.Any())
+                {
+                    <h6 class="text-muted text-uppercase small">Medications</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead class="table-light"><tr><th>Drug</th><th>Dose</th><th>Route</th></tr></thead>
+                            <tbody>
+                            @foreach (var m in p.Medications.OrderBy(x => x.Id))
+                            {
+                                <tr>
+                                    <td>@m.Medication1</td>
+                                    <td>@m.Dosage.ToString(inv)</td>
+                                    <td>@m.Administration</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                @if (p.Allergies.Any())
+                {
+                    <h6 class="text-muted text-uppercase small">Allergies</h6>
+                    <ul class="mb-0">
+                        @foreach (var a in p.Allergies.OrderBy(x => x.Id))
+                        {
+                            <li>@a.Allergy</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.StudentCustomUserId != 0)
+    {
+        <p class="mb-0 mt-4">Note that your student id is @Model.StudentCustomUserId. Use this in the simulation.</p>
+    }
+</div>

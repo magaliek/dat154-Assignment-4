@@ -1,12 +1,10 @@
 {
   "profiles": {
-    "Windows Machine": {
-      "commandName": "Project",
-      "nativeDebugging": false
+    "Task2": {
+      "commandName": "Project"
     },
-    "Windows Machine (Azure API)": {
+    "Task2 (Azure API)": {
       "commandName": "Project",
-      "nativeDebugging": false,
       "environmentVariables": {
         "DAT154_API_BASE_URL": "https://replace-with-your-app.azurewebsites.net"
       }

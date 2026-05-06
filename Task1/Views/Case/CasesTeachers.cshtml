@@ -1,57 +1,69 @@
 @model Assignment_4.Models.TeacherCasesViewModel
 
-<h1>All Cases</h1>
+<div class="cases-page-shell">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h1 class="mb-0">All Cases</h1>
+        <a asp-action="Create" class="btn btn-primary btn-sm">Create case</a>
+    </div>
 
-<table border="1" cellpadding="6">
-    <tr>
-        <th>Case id</th>
-        <th>Name</th>
-        <th>Age</th>
-        <th>Sex</th>
-        <th>Active</th>
-        <th>Action</th>
-        <th>Assign student</th>
-    </tr>
-    @foreach (var patient in Model.Patients)
-    {
-        <tr>
-            <td>@patient.Id</td>
-            <td>@patient.Name</td>
-            <td>@patient.Age</td>
-            <td>@patient.Sex</td>
-            <td>@(patient.IsActive ? "Active" : "Inactive")</td>
-            <td>
-                <form method="post" asp-action="ToggleActive" asp-controller="Case">
-                    <input type="hidden" name="id" value="@patient.Id" />
-                    <button type="submit">@(patient.IsActive ? "Deactivate" : "Activate")</button>
-                </form>
-            </td>
-            <td>
-                <form asp-action="AssignStudent" asp-controller="Case" method="post" style="display:inline;">
-                    <input type="hidden" name="patientId" value="@patient.Id" />
-                    <select name="studentCustomUserId" onchange="this.form.submit()">
-                        @if (patient.StudentId == null)
-                        {
-                            <option value="" selected="selected">Not assigned</option>
-                        }
-                        else
-                        {
-                            <option value="">Not assigned</option>
-                        }
-                        @foreach (var s in Model.Students)
-                        {
-                            if (patient.StudentId == s.Id)
-                            {
-                                <option value="@s.Id" selected="selected">Id @s.Id: @s.Email</option>
-                            }
-                            else
-                            {
-                                <option value="@s.Id">Id @s.Id: @s.Email</option>
-                            }
-                        }
-                    </select>
-                </form>
-            </td>
-        </tr>
-    }
-</table>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle text-center cases-table">
+            <thead class="table-light">
+                <tr>
+                    <th>Case id</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                    <th>Assign student</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var patient in Model.Patients)
+            {
+                <tr>
+                    <td>@patient.Id</td>
+                    <td>@patient.Name</td>
+                    <td class="text-center">
+                        <div class="d-flex flex-wrap gap-1 justify-content-center">
+                            <a asp-action="Edit" asp-route-id="@patient.Id" class="btn btn-outline-primary btn-sm">Edit</a>
+                            <form asp-action="ToggleActive" asp-controller="Case" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@patient.Id" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">@(patient.IsActive ? "Deactivate" : "Activate")</button>
+                            </form>
+                            <form asp-action="Delete" asp-controller="Case" method="post" class="d-inline" onsubmit="return confirm('Delete this case and all related data (sessions, diagnoses, etc.)? This cannot be undone.');">
+                                <input type="hidden" name="id" value="@patient.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <form asp-action="AssignStudent" asp-controller="Case" method="post" class="d-inline-flex justify-content-center">
+                            <input type="hidden" name="patientId" value="@patient.Id" />
+                            <select name="studentCustomUserId" class="form-select form-select-sm" style="min-width: 10rem;" onchange="this.form.submit()">
+                                @if (patient.StudentId == null)
+                                {
+                                    <option value="" selected="selected">Not assigned</option>
+                                }
+                                else
+                                {
+                                    <option value="">Not assigned</option>
+                                }
+                                @foreach (var s in Model.Students)
+                                {
+                                    if (patient.StudentId == s.Id)
+                                    {
+                                        <option value="@s.Id" selected="selected">Id @s.Id: @s.Email</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@s.Id">Id @s.Id: @s.Email</option>
+                                    }
+                                }
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
