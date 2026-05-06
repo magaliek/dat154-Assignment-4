@@ -7,7 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "..\\dat154-Assignment-4\\Task1.csproj",
+        "Path": "..\\Task1\\Task1.csproj",
         "Action": "Start"
       }
     ]
