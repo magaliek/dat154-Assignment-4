@@ -1,6 +1,6 @@
 using SharedLogic;
 
-namespace SimulationInterface;
+namespace Task2;
 
 public static class PhysiologicalEngine
 {

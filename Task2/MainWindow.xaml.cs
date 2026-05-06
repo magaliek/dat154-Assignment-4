@@ -1,7 +1,7 @@
 using System.Windows;
 using SharedLogic;
 
-namespace SimulationInterface
+namespace Task2
 {
     public partial class MainWindow : Window
     {

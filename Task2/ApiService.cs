@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using SharedLogic;
 
-namespace SimulationInterface
+namespace Task2
 {
     public class ApiService
     {

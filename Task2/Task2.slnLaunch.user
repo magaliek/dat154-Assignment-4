@@ -3,11 +3,11 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "SimulationInterface.csproj",
+        "Path": "Task2.csproj",
         "Action": "Start"
       },
       {
-        "Path": "..\\dat154-Assignment-4\\Assignment 4.csproj",
+        "Path": "..\\dat154-Assignment-4\\Task1.csproj",
         "Action": "Start"
       }
     ]

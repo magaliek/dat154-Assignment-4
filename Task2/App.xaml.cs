@@ -1,8 +1,8 @@
-﻿using System.Configuration;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 
-namespace SimulationInterface
+namespace Task2
 {
     /// <summary>
     /// Interaction logic for App.xaml
