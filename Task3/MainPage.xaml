@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Task3"
+             x:Class="Task3.MainPage"
+             Title=""
+             BackgroundColor="#F5F5F5">
+
+    <ContentPage.Resources>
+        <DataTemplate x:Key="LineTemplate" x:DataType="local:LineItem">
+            <Label Text="{Binding Text}" Padding="6,2" FontSize="13" TextColor="#222" />
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <Grid Margin="10" RowSpacing="10" ColumnSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                <Label Text="Session id" VerticalOptions="Center" TextColor="#333" />
+                <Entry x:Name="SessionIdEntry"
+                       WidthRequest="100"
+                       MinimumWidthRequest="80"
+                       Keyboard="Numeric"
+                       Placeholder="e.g. 3"
+                       PlaceholderColor="#888888"
+                       BackgroundColor="White"
+                       TextColor="#1a1a1a" />
+                <Button Text="Load case" Clicked="OnLoadCaseClicked" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Border Grid.Row="1" BackgroundColor="#1a1a2e" StrokeShape="RoundRectangle 5" Padding="12">
+                <HorizontalStackLayout Spacing="16">
+                    <Label x:Name="PatientNameLabel" Text="No session loaded"
+                           TextColor="White" FontSize="18" FontAttributes="Bold" />
+                    <Label x:Name="PatientInfoLabel" Text=""
+                           TextColor="#cccccc" FontSize="14" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" RowSpacing="10" Margin="0,0,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4">
+                        <Grid RowDefinitions="Auto,*" Padding="0">
+                            <Label Grid.Row="0"
+                                   Text="Vital Signs"
+                                   FontAttributes="Bold"
+                                   FontSize="14"
+                                   TextColor="#333"
+                                   BackgroundColor="#f0f0f0"
+                                   Padding="10,8" />
+                            <Grid Grid.Row="1" Padding="10" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Margin="5">
+                                    <Label Text="Blood Pressure" FontAttributes="Bold" FontSize="12" TextColor="#333" />
+                                    <Label x:Name="BpLabel" Text="--/-- mmHg" FontSize="20" TextColor="#111" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="1" Margin="5">
+                                    <Label Text="Heart Rate" FontAttributes="Bold" FontSize="12" TextColor="#333" />
+                                    <Label x:Name="HrLabel" Text="-- bpm" FontSize="20" TextColor="#111" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="2" Margin="5">
+                                    <Label Text="SpO2" FontAttributes="Bold" FontSize="12" TextColor="#333" />
+                                    <Label x:Name="Spo2Label" Text="-- %" FontSize="20" TextColor="#111" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="0" Margin="5">
+                                    <Label Text="Respiratory Rate" FontAttributes="Bold" FontSize="12" TextColor="#333" />
+                                    <Label x:Name="RrLabel" Text="-- /min" FontSize="20" TextColor="#111" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="1" Margin="5">
+                                    <Label Text="Temperature" FontAttributes="Bold" FontSize="12" TextColor="#333" />
+                                    <Label x:Name="TempLabel" Text="-- °C" FontSize="20" TextColor="#111" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout Grid.Row="1" Spacing="6">
+                        <Label Text="Teacher comment" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Border BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4" Padding="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry x:Name="ObservationEntry"
+                                       Grid.Column="0"
+                                       Placeholder="Note"
+                                       PlaceholderColor="#888888"
+                                       BackgroundColor="White"
+                                       TextColor="#1a1a1a"
+                                       Margin="0,0,8,0" />
+                                <Button Grid.Column="1" Text="Add" Clicked="OnAddObservationClicked" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="2" Spacing="6">
+                        <Label Text="Debrief" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Label Text="Updates automatically while a session is open." FontSize="11" TextColor="#666" />
+                        <Button Text="Export PDF" Clicked="OnExportPdfClicked" HorizontalOptions="Start" />
+                        <Editor x:Name="DebriefEditor" IsReadOnly="True" HeightRequest="160" TextColor="#222"
+                                BackgroundColor="White" Placeholder="—" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="3" Spacing="6">
+                        <Label Text="Event log" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Border BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4" HeightRequest="260">
+                            <CollectionView x:Name="EventLogView"
+                                            ItemTemplate="{StaticResource LineTemplate}"
+                                            ItemsUpdatingScrollMode="KeepLastItemInView" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Grid Grid.Column="1" RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <VerticalStackLayout Grid.Row="0" Spacing="4">
+                        <Label Text="Allergies" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Border BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4" HeightRequest="160">
+                            <CollectionView x:Name="AllergiesView" ItemTemplate="{StaticResource LineTemplate}" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="1" Spacing="4">
+                        <Label Text="Medications" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Border BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4" HeightRequest="160">
+                            <CollectionView x:Name="MedicationsView" ItemTemplate="{StaticResource LineTemplate}" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="2" Spacing="4">
+                        <Label Text="Diagnoses" FontAttributes="Bold" FontSize="14" TextColor="#333" />
+                        <Border BackgroundColor="White" Stroke="#CCCCCC" StrokeThickness="1" StrokeShape="RoundRectangle 4" HeightRequest="160">
+                            <CollectionView x:Name="DiagnosesView" ItemTemplate="{StaticResource LineTemplate}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollView>
+</ContentPage>

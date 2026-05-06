@@ -1,4 +1,6 @@
 <Solution>
-  <Project Path="Assignment 4.csproj" />
-  <Project Path="..\SimulationInterface\SimulationInterface.csproj" />
+  <Project Path="../SharedLogic/SharedLogic.csproj" Id="272f133e-06eb-4354-83a5-7e79006e19e4" />
+  <Project Path="../SimulationInterface/Task2.csproj" />
+  <Project Path="../Task3/Task3.csproj" Id="d87684ec-fa04-4024-8817-2ac96192be18" />
+  <Project Path="Task1.csproj" />
 </Solution>

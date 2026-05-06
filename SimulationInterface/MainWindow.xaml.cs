@@ -1,12 +1,13 @@
-﻿using System.Windows;
-using SimulationInterface.Models;
+using System.Windows;
+using SharedLogic;
 
 namespace SimulationInterface
 {
     public partial class MainWindow : Window
     {
         private readonly ApiService _apiService;
-        private PatientModel? _currentPatient;
+        private CaseDto? _currentPatient;
+        private int? _sessionId;
 
         public MainWindow()
         {
@@ -31,10 +32,12 @@ namespace SimulationInterface
             }
 
             _currentPatient = patient;
+            _sessionId = await _apiService.StartSessionAsync(patient.Id, studentId);
+            SessionIdText.Text = _sessionId?.ToString() ?? "";
             DisplayPatient(patient);
         }
 
-        private void DisplayPatient(PatientModel patient)
+        private void DisplayPatient(CaseDto patient)
         {
             PatientNameText.Text = patient.Name;
             PatientInfoText.Text = $"Age: {patient.Age} | Sex: {patient.Sex} | Weight: {patient.Weight}";
@@ -47,7 +50,7 @@ namespace SimulationInterface
 
             AllergiesList.Items.Clear();
             foreach (var a in patient.Allergies)
-                AllergiesList.Items.Add(a.Allergy1);
+                AllergiesList.Items.Add(a.Allergy);
 
             MedicationsList.Items.Clear();
             DrugComboBox.Items.Clear();
@@ -62,7 +65,7 @@ namespace SimulationInterface
                 DiagnosesList.Items.Add(d.Diagnosis1);
         }
 
-        private void RegisterIntervention_Click(object sender, RoutedEventArgs e)
+        private async void RegisterIntervention_Click(object sender, RoutedEventArgs e)
         {
             if (_currentPatient == null)
             {
@@ -88,9 +91,9 @@ namespace SimulationInterface
 
             foreach (var allergy in _currentPatient.Allergies)
             {
-                if (allergy.Allergy1 != null && allergy.Allergy1.ToLower().Contains(drug.ToLower()))
+                if (!string.IsNullOrEmpty(allergy.Allergy) && allergy.Allergy.ToLower().Contains(drug.ToLower()))
                 {
-                    MessageBox.Show($"⚠️ WARNING: {drug} is contraindicated — patient has a documented allergy!\n\n{allergy.Allergy1}",
+                    MessageBox.Show($"⚠️ WARNING: {drug} is contraindicated — patient has a documented allergy!\n\n{allergy.Allergy}",
                         "Allergy Alert", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
@@ -98,6 +101,9 @@ namespace SimulationInterface
             PhysiologicalEngine.ApplyEffect(_currentPatient, drug, doseValue, route);
 
             DisplayPatient(_currentPatient);
+
+            if (_sessionId.HasValue)
+                await _apiService.PostActionAsync(_sessionId.Value, drug, doseValue, route ?? "");
 
             var timestamp = DateTime.Now.ToString("HH:mm:ss");
             var logEntry = $"[{timestamp}] {drug} {dose}mg {route}";

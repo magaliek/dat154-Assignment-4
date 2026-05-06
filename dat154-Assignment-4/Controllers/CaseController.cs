@@ -1,4 +1,5 @@
-﻿using Assignment_4.Data;
+using Assignment_4.Data;
+using Assignment_4.Mapping;
 using Assignment_4.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,38 @@ namespace Assignment_4.Controllers
 
         public IActionResult TeacherCases()
         {
-            var patients = _db.Patients.ToList();
-            return View("CasesTeachers", patients);
+            var vm = new TeacherCasesViewModel
+            {
+                Patients = _db.Patients.OrderBy(p => p.Id).ToList(),
+                Students = _db.CustomUsers.Where(u => u.Role == "Student").OrderBy(u => u.Id).ToList()
+            };
+            return View("CasesTeachers", vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AssignStudent(int patientId, string? studentCustomUserId)
+        {
+            var patient = _db.Patients.FirstOrDefault(p => p.Id == patientId);
+            if (patient == null)
+                return RedirectToAction(nameof(TeacherCases));
+
+            if (string.IsNullOrWhiteSpace(studentCustomUserId))
+                patient.StudentId = null;
+            else if (int.TryParse(studentCustomUserId, out var sid))
+                patient.StudentId = sid;
+
+            _db.SaveChanges();
+            return RedirectToAction(nameof(TeacherCases));
         }
 
         public async Task<IActionResult> StudentCases()
         {
             var identityUser = await _userManager.GetUserAsync(User);
-            var user = _appDb.CustomUsers.FirstOrDefault(u => u.Email == identityUser.Email);
-            var patient = _db.Patients.FirstOrDefault(p => p.StudentId == user.Id);
+            if (identityUser?.Email is not { } email)
+                return Challenge();
+            var user = _db.CustomUsers.FirstOrDefault(u => u.Email == email);
+            var patient = user == null ? null : _db.Patients.FirstOrDefault(p => p.StudentId == user.Id);
             return View("CasesStudents", patient);
         }
 
@@ -58,7 +82,7 @@ namespace Assignment_4.Controllers
             if (patient == null)
                 return NotFound("No active case for this student");
 
-            return Ok(patient);
+            return Ok(CaseMapper.ToDto(patient));
         }
     }
 }

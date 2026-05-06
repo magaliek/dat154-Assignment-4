@@ -44,6 +44,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
@@ -57,6 +58,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<Dat154Gr2Context>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
     await SeedData.Initialize(db, userManager);
+    await SimulationSchemaInitializer.EnsureTablesAsync(db);
 }
 
 app.Run();

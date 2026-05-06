@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,9 +21,16 @@ public partial class Dat154Gr2Context : DbContext
     public virtual DbSet<Medication> Medications { get; set; }
     public virtual DbSet<Patient> Patients { get; set; }
     public virtual DbSet<Allergies> Allergies { get; set; }
+    public virtual DbSet<SimulationSession> SimulationSessions { get; set; }
+    public virtual DbSet<SimulationAction> SimulationActions { get; set; }
+    public virtual DbSet<TeacherObservation> TeacherObservations { get; set; }
+    public virtual DbSet<SimulationDeviation> SimulationDeviations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Server=tcp:dat154-gr2-assignment4.database.windows.net,1433;Initial Catalog=dat154_gr2;Persist Security Info=False;User ID=dat154ADMIN;Password=DAT154Assignment4Gr2;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+    {
+        if (!optionsBuilder.IsConfigured)
+            optionsBuilder.UseSqlServer("Server=tcp:dat154-gr2-assignment4.database.windows.net,1433;Initial Catalog=dat154_gr2;Persist Security Info=False;User ID=dat154ADMIN;Password=DAT154Assignment4Gr2;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,6 +103,42 @@ public partial class Dat154Gr2Context : DbContext
                 .HasForeignKey(d => d.PatientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Allergies_Patients");
+        });
+
+        modelBuilder.Entity<SimulationSession>(entity =>
+        {
+            entity.ToTable("SimulationSessions");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Patient).WithMany()
+                .HasForeignKey(e => e.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SimulationAction>(entity =>
+        {
+            entity.ToTable("SimulationActions");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Session).WithMany(s => s.Actions)
+                .HasForeignKey(e => e.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TeacherObservation>(entity =>
+        {
+            entity.ToTable("TeacherObservations");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Session).WithMany(s => s.Observations)
+                .HasForeignKey(e => e.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SimulationDeviation>(entity =>
+        {
+            entity.ToTable("SimulationDeviations");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Action).WithMany(a => a.Deviations)
+                .HasForeignKey(e => e.ActionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

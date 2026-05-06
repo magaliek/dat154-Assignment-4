@@ -1,18 +1,21 @@
-﻿@model List<Assignment_4.Models.Patient>
+@model Assignment_4.Models.TeacherCasesViewModel
 
 <h1>All Cases</h1>
 
-<table border="1">
+<table border="1" cellpadding="6">
     <tr>
+        <th>Case id</th>
         <th>Name</th>
         <th>Age</th>
         <th>Sex</th>
         <th>Active</th>
         <th>Action</th>
+        <th>Assign student</th>
     </tr>
-    @foreach (var patient in Model)
+    @foreach (var patient in Model.Patients)
     {
         <tr>
+            <td>@patient.Id</td>
             <td>@patient.Name</td>
             <td>@patient.Age</td>
             <td>@patient.Sex</td>
@@ -21,6 +24,32 @@
                 <form method="post" asp-action="ToggleActive" asp-controller="Case">
                     <input type="hidden" name="id" value="@patient.Id" />
                     <button type="submit">@(patient.IsActive ? "Deactivate" : "Activate")</button>
+                </form>
+            </td>
+            <td>
+                <form asp-action="AssignStudent" asp-controller="Case" method="post" style="display:inline;">
+                    <input type="hidden" name="patientId" value="@patient.Id" />
+                    <select name="studentCustomUserId" onchange="this.form.submit()">
+                        @if (patient.StudentId == null)
+                        {
+                            <option value="" selected="selected">Not assigned</option>
+                        }
+                        else
+                        {
+                            <option value="">Not assigned</option>
+                        }
+                        @foreach (var s in Model.Students)
+                        {
+                            if (patient.StudentId == s.Id)
+                            {
+                                <option value="@s.Id" selected="selected">Id @s.Id: @s.Email</option>
+                            }
+                            else
+                            {
+                                <option value="@s.Id">Id @s.Id: @s.Email</option>
+                            }
+                        }
+                    </select>
                 </form>
             </td>
         </tr>
